@@ -189,8 +189,8 @@
         var posisi = [{{ $data_config['lat'] }}, {{ $data_config['lng'] }}];
         var zoom = {{ $data_config['zoom'] ?: 10 }};
     @else
-        var posisi = [-7.3983118, 109.5432662]; // default center (e.g., Central Java)
-        var zoom = 15; // zoom out to see Indonesia
+        var posisi = [-7.3983118, 109.5432662]; // default center
+        var zoom = 15;
     @endif
 
     var options = {
@@ -206,8 +206,8 @@
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(lokasi_kantor);
 
-    // Create custom icon
-   var customIcon = L.divIcon({
+    // Custom icon
+    var customIcon = L.divIcon({
         className: 'custom-location-marker',
         html: `
             <div class="location-pin">
@@ -224,63 +224,57 @@
         popupAnchor: [0, -40]
     });
 
-    // Add marker with custom icon
+    // Add marker
     var marker = L.marker(posisi, { icon: customIcon }).addTo(lokasi_kantor);
 
-    // Modal elements
+    // Ambil host saat ini
+    var currentHost = window.location.hostname;
+
+    // Elemen modal
     var modal = document.getElementById('videoModal');
     var video = document.getElementById('cctvVideo');
     var closeBtn = document.getElementById('closeModal');
 
-    // Function to open modal
+    // Fungsi buka modal
     function openVideoModal() {
         modal.classList.remove('hidden');
-        setTimeout(() => {
-            modal.classList.add('show');
-        }, 10);
-        
-        // Reset and play video
         video.currentTime = 0;
-        video.play().catch(function(error) {
-            console.log('Auto-play was prevented:', error);
+        video.play().catch((err) => console.log('Autoplay prevented:', err));
+    }
+
+    // Fungsi tutup modal
+    function closeVideoModal() {
+        video.pause();
+        modal.classList.add('hidden');
+    }
+
+    // Jalankan hanya jika host == timbang-purbalingga.digidesa.id
+    if (currentHost === 'timbang-purbalingga.digidesa.id') {
+        marker.on('click', function() {
+            openVideoModal();
+        });
+
+        // Tooltip aktif
+        marker.bindTooltip("Klik untuk melihat CCTV Pelayanan", {
+            permanent: false,
+            direction: "top",
+            offset: [0, -10]
+        });
+    } else {
+        // Tooltip pasif (tanpa klik)
+        marker.bindTooltip("Lokasi Kantor {{ ucfirst(setting('sebutan_desa')) }}", {
+            permanent: false,
+            direction: "top",
+            offset: [0, -10]
         });
     }
 
-    // Function to close modal
-    function closeVideoModal() {
-        modal.classList.remove('show');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            video.pause();
-        }, 300);
-    }
-
-    // Add click event to marker
-    marker.on('click', function(e) {
-        openVideoModal();
-    });
-
-    // Close modal events
+    // Tutup modal
     closeBtn.addEventListener('click', closeVideoModal);
-
-    // Close modal when clicking outside
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            closeVideoModal();
-        }
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeVideoModal();
     });
-
-    // Close modal with Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-            closeVideoModal();
-        }
-    });
-
-    // Add tooltip to marker
-    marker.bindTooltip("Klik untuk melihat CCTV Pelayanan", {
-        permanent: false,
-        direction: "top",
-        offset: [0, -10]
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeVideoModal();
     });
 </script>
