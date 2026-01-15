@@ -131,7 +131,11 @@
                     <h4 class="text-h6 text-primary-200"><i class="fas fa-pencil-alt mr-1"></i> Buat Pengaduan Baru</h4>
                 </div>
                 <form action="{{ $form_action }}" method="POST" enctype="multipart/form-data">
-                    @csrf
+                    @php
+                        $csrfName = function_exists('csrf_token') ? '_token' : (app()->bound('ci') ? app('ci')->security->get_csrf_token_name() : '_token');
+                        $csrfValue = function_exists('csrf_token') ? csrf_token() : (app()->bound('ci') ? app('ci')->security->get_csrf_hash() : '');
+                    @endphp
+                    <input type="hidden" name="{{ $csrfName }}" value="{{ $csrfValue }}">
                     <div class="modal-body relative px-3 py-2 lg:px-5">
                         <!-- Notifikasi -->
                         @include('theme::commons.notifikasi')

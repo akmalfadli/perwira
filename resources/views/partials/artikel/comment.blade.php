@@ -90,7 +90,11 @@
             </div>
 
             <form action="{{ site_url('/add_comment/' . $single_artikel['id']) }}" method="POST" class="p-6 space-y-6">
-                @csrf
+                @php
+                    $csrfName = function_exists('csrf_token') ? '_token' : (app()->bound('ci') ? app('ci')->security->get_csrf_token_name() : '_token');
+                    $csrfValue = function_exists('csrf_token') ? csrf_token() : (app()->bound('ci') ? app('ci')->security->get_csrf_hash() : '');
+                @endphp
+                <input type="hidden" name="{{ $csrfName }}" value="{{ $csrfValue }}">
                 {{-- Alert Messages --}}
                 @php $alert = ($notif['status'] == -1) ? 'error' : 'success'; @endphp
                 @if ($flash_message = $notif['pesan'])
