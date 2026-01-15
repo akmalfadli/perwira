@@ -90,6 +90,7 @@
             </div>
 
             <form action="{{ site_url('/add_comment/' . $single_artikel['id']) }}" method="POST" class="p-6 space-y-6">
+                @csrf
                 {{-- Alert Messages --}}
                 @php $alert = ($notif['status'] == -1) ? 'error' : 'success'; @endphp
                 @if ($flash_message = $notif['pesan'])

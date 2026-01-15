@@ -6,10 +6,22 @@
     $desa_title = $title ? $title . ' - ' . $suffix : $suffix;
 @endphp
 
+@php
+    $csrfToken = null;
+    if (function_exists('csrf_token')) {
+        $csrfToken = csrf_token();
+    } elseif (function_exists('app') && app()->bound('ci')) {
+        $csrfToken = app('ci')->security->get_csrf_hash();
+    }
+@endphp
+
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name='viewport' content='width=device-width, initial-scale=1' />
+@if ($csrfToken)
+    <meta name="csrf-token" content="{{ $csrfToken }}" />
+@endif
 <meta name='google' content='notranslate' />
 <meta name='theme' content='Perwira' />
 <meta name='designer' content='Akmal Fadli' />
@@ -67,11 +79,23 @@
 <link rel="shortcut icon" href="{{ favico_desa() }}" />
 <noscript>You must have JavaScript enabled in order to use this theme. Please enable JavaScript and then reload this page in order to continue.</noscript>
 @if (cek_koneksi_internet())
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 @endif
 <script>
     var BASE_URL = '{{ base_url() }}';
     var SITE_URL = '{{ site_url() }}';
     var setting = @json(setting());
     var config = @json(identitas());
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var csrfTag = document.querySelector('meta[name="csrf-token"]');
+        if (csrfTag && window.jQuery) {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': csrfTag.getAttribute('content')
+                }
+            });
+        }
+    });
 </script>
